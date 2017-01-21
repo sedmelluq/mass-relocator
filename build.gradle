@@ -1,0 +1,71 @@
+buildscript {
+  repositories {
+    maven {
+      url 'https://plugins.gradle.org/m2/'
+    }
+  }
+  dependencies {
+    classpath 'com.gradle.publish:plugin-publish-plugin:0.9.7'
+  }
+}
+
+plugins {
+  id 'java-gradle-plugin'
+  id 'maven-publish'
+  id 'com.jfrog.bintray' version '1.7.3'
+}
+
+apply plugin: 'com.gradle.plugin-publish'
+
+group 'com.sedmelluq'
+ext.moduleName = 'mass-relocator'
+version = '1.0.0'
+
+repositories {
+  jcenter()
+}
+
+dependencies {
+  compile gradleApi()
+  compile 'com.github.jengelman.gradle.plugins:shadow:1.2.4'
+}
+
+gradlePlugin {
+  plugins {
+    massRelocator {
+      id = 'com.sedmelluq.mass-relocator'
+      implementationClass = 'com.sedmelluq.gradle.massrelocator.ShadowMassRelocatorPlugin'
+    }
+  }
+}
+
+bintray {
+  user = System.properties['bintray.user']
+  key = System.properties['bintray.apiKey']
+  publications = ['pluginMaven', 'massRelocatorPluginMarkerMaven']
+  pkg {
+    repo = rootProject.group
+    name = 'mass-relocator'
+  }
+}
+
+pluginBundle {
+  website = 'https://github.com/sedmelluq/mass-relocator'
+  vcsUrl = 'https://github.com/sedmelluq/mass-relocator'
+
+  plugins {
+    massRelocator {
+      id = "${group}.${moduleName}"
+      displayName = 'Shadow Mass Relocator'
+      description = 'Makes shadow task relocate everything moveable'
+      tags = ['shade']
+      version = project.version
+    }
+  }
+
+  mavenCoordinates {
+    groupId = group
+    artifactId = moduleName
+    version = project.version
+  }
+}
